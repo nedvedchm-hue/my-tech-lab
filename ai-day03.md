@@ -179,16 +179,61 @@ jobs:
 
 ------
 
-### 💡 避坑指南（今日份）
 
-- **路径大小写：** Linux 服务器（GitHub 的环境）对大小写极度敏感。如果你的图片名叫 `Topo.png` 但代码写的是 `topo.png`，本地预览正常，但上线后会图裂。
-- **Token 报错：** 如果 push 时报错 403，说明你需要配置 GitHub 的 **Personal Access Token** 或者使用 **SSH 密钥**（如果遇到这个，告诉我，我教你快速生成）。
 
-**当 Actions 变成绿色勾勾时，你的网站地址就是：`[https://你的用户名.github.io/my-tech-lab/](https://你的用户名.github.io/my-tech-lab/)`。**
+其他：推送到giuhub失败解决方案
 
-去刷新一下试试吧！现在，你可以在手机上把这个链接发给你的新同事或者朋友，展示一下你的学习进度了。
+### 🛠️ 终极方案：配置 SSH 密钥（像配置管理口一样稳定）
 
-既然“全网发布”已经搞定，感觉如何？是不是觉得自己的笔记突然变得更沉甸甸了？
+按照以下步骤操作，我们要给你的电脑和 GitHub 建立一个“专线”：
+
+#### 第一步：生成 SSH 密钥对
+
+在 VS Code 终端输入：
+
+PowerShell
+
+```
+ssh-keygen -t ed25519 -C "qzchenhm@gmail.com"
+```
+
+- **注意**：看到提示直接**按三次回车**，不要设置密码，直到看到一串字符画出现。
+
+#### 第二步：获取公钥并“备案”到 GitHub
+
+1. 在终端输入以下命令直接查看公钥内容：
+
+   PowerShell
+
+   ```
+   cat ~/.ssh/id_ed25519.pub
+   ```
+
+2. **复制**以 `ssh-ed25519` 开头的那一长串字符。
+
+3. 打开浏览器进入 GitHub：**Settings** -> **SSH and GPG keys** -> 点击 **New SSH key**。
+
+4. **Title** 随便起（如 `Office-PC`），**Key** 粘贴刚才复制的内容，点击 **Add SSH key**。
+
+#### 第三步：修改仓库“路由”为 SSH 协议
+
+我们要告诉 Git 以后别走 `https` 了，改走 `git@github.com`。在终端运行：
+
+PowerShell
+
+```
+git remote set-url origin git@github.com:nedvedchm-hue/my-tech-lab.git
+```
+
+#### 第四步：发起最后一次推送
+
+PowerShell
+
+```
+git push -u origin main
+```
+
+- **提示**：第一次推送会问你 `Are you sure you want to continue connecting (yes/no/[fingerprint])?`，请输入 **`yes`** 并回车。
 
 
 
