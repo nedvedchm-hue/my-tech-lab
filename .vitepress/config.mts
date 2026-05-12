@@ -22,8 +22,8 @@ export default withMermaid(defineConfig({
       {
         text: '🤖 AI 学习历程',
         items: [
-          { text: 'Day 01: 环境搭建与避坑', link: '/ai-day01' }
-          { text: 'Day 02: 学会用 Mermaid 画网络拓扑图', link: '/ai-day02' }
+          { text: 'Day 01: 环境搭建与避坑', link: '/ai-day01' },
+          { text: 'Day 02: 学会用 Mermaid 画网络拓扑图', link: '/ai-day02' },
           { text: 'Day 03: 从“本地”走向“全网”', link: '/ai-day03' }
         ]
       },
@@ -33,7 +33,7 @@ export default withMermaid(defineConfig({
         items: [
           { text: 'Day 01: OSPF 状态机原理', link: '/ospf-day01' },
           { text: 'Day 02: 状态机故障复现', link: '/ospf-day02' },
-          { text: 'Day 03: LSDB 中的秘密', link: '/ospf-day03' } 
+          { text: 'Day 03: LSDB 中的秘密', link: '/ospf-day03' } ,
           { text: 'Day 04: 特殊区域与路由汇总', link: '/ospf-day04' } 
         ]
       }
