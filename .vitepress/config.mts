@@ -3,6 +3,7 @@ import { withMermaid } from 'vitepress-plugin-mermaid' // 1. 引入画图插件
 
 // 2. 用 withMermaid 包裹原来的配置
 export default withMermaid(defineConfig({
+  base: '/my-tech-lab/',
   title: "AI & 网络实验室",
   description: "电信人从菜鸟到专家的 AI 进化记录",
   
