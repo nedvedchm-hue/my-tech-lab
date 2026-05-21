@@ -4,7 +4,8 @@ on:
   # 监听 main 分支的推送
   push:
     branches: [main]
-
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 # 这一步是关键：给 GitHub Actions 写入 Pages 的权限
 permissions:
   contents: read
