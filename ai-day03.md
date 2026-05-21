@@ -1,6 +1,6 @@
 # AI Day 03：从“本地”走向“全网”
 
-
+https://nedvedchm-hue.github.io/my-tech-lab/
 
 ---
 
@@ -237,9 +237,16 @@ git push -u origin main
 
 
 
+总结：
 
+# 1. 把修改后的 MathGame.vue 放入暂存区
+git add .
 
-### 
+# 2. 提交更新，并写好你的“破译备注”
+git commit -m "feat: 完美上线第五人格羊皮纸风格数学练习器"
+
+# 3. 走 SSH 专线，一键推送到 GitHub 云端
+git push
 
 
 
