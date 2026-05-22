@@ -1,10 +1,10 @@
-# AI Day 04：庄园解密
+# AI Day 05：庄园解密升级版
 
 
 
 # 每日数学练习
 
-<MathGame />
+<MathGameV2 />
 
 
 

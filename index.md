@@ -35,6 +35,7 @@ features:
 | **Day 02** | [学会用 Mermaid 画网络拓扑图](/ai-day02) | ✅ |
   **Day 03** | [如何将本地网站发布到 GitHub Pages（实现全球访问）](/ai-day03) | ✅ |
   **Day 04** | [庄园解密练习](/ai-day04) | ✅ |
+  **Day 05** | [庄园解密练习升级版](/ai-day05) | ✅ |
   </div>
 
   <div style="flex: 1; min-width: 300px;">

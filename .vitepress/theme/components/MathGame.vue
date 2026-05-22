@@ -5,20 +5,17 @@
         <div class="muse-mark-wrapper">
           <div class="muse-mark-logo"></div>
           <div class="muse-mark-text">Nightingale's Melody</div>
-          <h2>庄园解密：强制去括号特训 (负数全开版)</h2>
+          <h2>庄园解密：去括号与符号特训</h2>
         </div>
       </div>
       
-      <div class="rule-banner">
-        <span>⚠️ 庄园新法则：注意！第一个数可能会变成<b>负数</b>！必须先写出去括号算式（如输入 -15-6+3 ），再计算结果！</span>
-      </div>
-
       <div class="menu-box">
         <div>
           <label for="q-count">选择题量：</label>
           <select id="q-count" v-model.number="selectedCount" :disabled="isGraded">
             <option :value="5">5 题 (快速破译)</option>
             <option :value="10">10 题 (标准破译)</option>
+            <option :value="20">20 题 (极限挑战)</option>
           </select>
         </div>
         <button @click="generateQuiz">换一批新题</button>
@@ -26,31 +23,20 @@
 
       <div class="quiz-container">
         <div v-for="(item, i) in currentQuestions" :key="i" class="quiz-item">
-          <div class="q-title">第 {{ i + 1 }} 题：<span class="origin-q">{{ item.questionText }}</span></div>
-          
-          <div class="step-line">
-            <span class="step-label">1. 去括号:</span>
-            <input 
-              type="text" 
-              class="input-text" 
-              v-model="userSteps[i]"
-              placeholder="如: -17-6+2"
-              :disabled="isGraded"
-            >
-          </div>
-
-          <div class="step-line">
-            <span class="step-label">2. 算结果:</span>
+          <div class="q-line">
+            <span class="question-text">{{ i + 1 }}. &nbsp;{{ item.questionText }} =</span>
             <input 
               type="number" 
               class="input-ans" 
               v-model.number="userAnswers[i]"
-              placeholder="答案"
               :disabled="isGraded"
             >
           </div>
-
-          <div v-if="isGraded && feedbacks[i]" class="feedback" :class="feedbacks[i].isCorrect ? 'correct' : 'wrong'">
+          <div 
+            v-if="feedbacks[i]" 
+            class="feedback" 
+            :class="feedbacks[i].isCorrect ? 'correct' : 'wrong'"
+          >
             {{ feedbacks[i].text }}
           </div>
         </div>
@@ -68,7 +54,7 @@
 
       <div v-if="isGraded" id="result-panel">
         <div id="score-display">最终得分：{{ finalScore }} 分</div>
-        <p style="color: #555; margin: 5px 0 0 0; font-size: 14px;">负数去括号是初中数学的终极基本功，继续加油！</p>
+        <p style="color: #555; margin: 5px 0 0 0; font-size: 14px;">数据已写入下方的“庄园破译日记”</p>
       </div>
 
       <div class="history-section">
@@ -89,7 +75,9 @@
             <tr v-for="(item, idx) in historyList" :key="idx">
               <td>{{ item.time }}</td>
               <td>{{ item.total }}</td>
-              <td>{{ item.correct }}</td>
+              <td :style="{ color: item.correct === item.total ? '#2d5a27' : '#333', fontWeight: 'bold' }">
+                {{ item.correct }}
+              </td>
               <td :style="{ fontWeight: 'bold', color: item.score >= 80 ? '#2d5a27' : '#b80d0d' }">
                 {{ item.score }} 分
               </td>
@@ -107,114 +95,126 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const selectedCount = ref(5)
+// 状态控制
+const selectedCount = ref(10)
 const currentQuestions = ref([])
-const userSteps = ref([])      
-const userAnswers = ref([])    
+const userAnswers = ref([])
 const feedbacks = ref([])
 const isGraded = ref(false)
 const finalScore = ref(0)
 const historyList = ref([])
 
+// 工具函数：获取随机整数
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-// AI 核心出题引擎：完美注入首位负数逻辑
+// 核心自适应逻辑：利用 Set 生成完全不重复的四种题型
 function generateQuiz() {
   currentQuestions.value = []
-  userSteps.value = []
   userAnswers.value = []
   feedbacks.value = []
   isGraded.value = false
   finalScore.value = 0
 
-  while (currentQuestions.value.length < selectedCount.value) {
-    const type = getRandomInt(1, 2)
-    
-    // 💥 升级点：50% 概率让第一个数 a 蜕变为负数
-    let a = getRandomInt(10, 25)
-    if (Math.random() < 0.5) {
-      a = -a
-    }
+  const usedQuestions = new Set()
 
-    const b = getRandomInt(5, 12)
-    const c = getRandomInt(1, 4)
-    
+  while (currentQuestions.value.length < selectedCount.value) {
+    const type = getRandomInt(1, 4)
     let questionText = ''
-    let correctStep = '' 
     let answer = 0
 
-    if (type === 1) { 
-      // 模型一：a - (b - c) --> 去括号后：a - b + c
+    if (type === 1) { // a - (b - c)
+      const a = getRandomInt(12, 25)
+      const b = getRandomInt(6, 9)
+      const c = getRandomInt(1, 5)
       questionText = `${a} - (${b} - ${c})`
-      correctStep = `${a}-${b}+${c}`
-      answer = a - b + c
-    } else { 
-      // 模型二：a - (b + c) --> 去括号后：a - b - c
+      answer = a - (b - c)
+    } else if (type === 2) { // a - (b + c)
+      const a = getRandomInt(12, 25)
+      const b = getRandomInt(4, 8)
+      const c = getRandomInt(1, 4)
       questionText = `${a} - (${b} + ${c})`
-      correctStep = `${a}-${b}-${c}`
-      answer = a - b - c
+      answer = a - (b + c)
+    } else if (type === 3) { // -a - b
+      const a = getRandomInt(1, 9)
+      const b = getRandomInt(1, 9)
+      questionText = `-${a} - ${b}`
+      answer = -a - b
+    } else { // -a + b
+      const a = getRandomInt(6, 12)
+      const b = getRandomInt(1, 5)
+      questionText = `-${a} + ${b}`
+      answer = -a + b
     }
 
-    // 格式化一下正数开头的显示（例如把 --12 这种概率规避，确保公式优美）
-    // 经过上面的规则调整，questionText 会完美呈现如 "-15 - (8 - 2)"
-    currentQuestions.value.push({ questionText, correctStep, answer })
+    if (!usedQuestions.has(questionText)) {
+      usedQuestions.add(questionText)
+      currentQuestions.value.push({ questionText, answer })
+    }
   }
 }
 
+// 批量提交并检查得分
 function gradeQuiz() {
   let correctCount = 0
   const count = currentQuestions.value.length
   feedbacks.value = []
 
   for (let i = 0; i < count; i++) {
-    // 过滤用户输入中的空格，并且把多余的 +- 号连消（防止小侦探输入 +- 绕过）
-    const userStepClean = String(userSteps.value[i] || '').replace(/\s+/g, '').replace(/\+\-/g, '-').replace(/\-\+/g, '-')
-    const userAnsClean = parseInt(userAnswers.value[i])
-    
-    const targetStep = currentQuestions.value[i].correctStep
-    const targetAns = currentQuestions.value[i].answer
+    const userVal = parseInt(userAnswers.value[i])
+    const realAns = currentQuestions.value[i].answer
 
-    if (userStepClean === targetStep && userAnsClean === targetAns) {
+    if (userVal === realAns) {
       correctCount++
-      feedbacks.value[i] = { text: '● 成功破译机关！', isCorrect: true }
-    } else if (userStepClean !== targetStep && userAnsClean === targetAns) {
-      feedbacks.value[i] = { text: `✕ 偷懒警告：你没正常去括号！应填: ${targetStep}`, isCorrect: false }
+      feedbacks.value[i] = {
+        text: '● 成功破解',
+        isCorrect: true
+      }
     } else {
-      feedbacks.value[i] = { text: `✕ 触发机关！正确步骤: ${targetStep} = ${targetAns}`, isCorrect: false }
+      feedbacks.value[i] = {
+        text: `✕ 触发机关 (正确答案: ${realAns})`,
+        isCorrect: false
+      }
     }
   }
 
   finalScore.value = Math.round((correctCount / count) * 100)
   isGraded.value = true
 
+  // 写入历史持久化记录
   saveToHistory(count, correctCount, finalScore.value)
 }
 
+// 持久化存储到浏览器
 function saveToHistory(total, correct, score) {
   if (typeof window === 'undefined') return
   const now = new Date()
   const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
-  let history = JSON.parse(localStorage.getItem('v5_step_history_v2') || '[]')
+  
+  let history = JSON.parse(localStorage.getItem('v5_math_history') || '[]')
   history.unshift({ time: timeStr, total, correct, score })
-  localStorage.setItem('v5_step_history_v2', JSON.stringify(history))
+  if (history.length > 15) history.pop()
+  localStorage.setItem('v5_math_history', JSON.stringify(history))
   historyList.value = history
 }
 
+// 渲染读取缓存历史
 function renderHistory() {
   if (typeof window !== 'undefined') {
-    historyList.value = JSON.parse(localStorage.getItem('v5_step_history_v2') || '[]')
+    historyList.value = JSON.parse(localStorage.getItem('v5_math_history') || '[]')
   }
 }
 
+// 清空历史数据
 function clearHistory() {
-  if (confirm('确定要清空所有的历史记录吗？')) {
-    localStorage.removeItem('v5_step_history_v2')
+  if (confirm('确定要烧毁（清空）所有的破译日记记录吗？')) {
+    localStorage.removeItem('v5_math_history')
     historyList.value = []
   }
 }
 
+// Vue 挂载钩子，接管原生 window.onload 行为
 onMounted(() => {
   generateQuiz()
   renderHistory()
@@ -222,45 +222,253 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 样式保持不变，完美适配第五人格羊皮纸风格 */
-.v5-body { background-color: #1a1612; padding: 15px; border-radius: 12px; margin: 20px 0; }
-.container { max-width: 750px; margin: 10px auto; background-color: #f4ecd8; padding: 25px; border-radius: 8px; border: 6px double #4a0404; color: #333; }
-.v5-header { text-align: center; border-bottom: 4px dashed #4a0404; padding-bottom: 15px; margin-bottom: 20px; }
-.muse-mark-wrapper { display: flex; flex-direction: column; align-items: center; }
-.muse-mark-logo { width: 60px; height: 60px; background-repeat: no-repeat; background-position: center; background-size: contain; background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzRhMDQwNCI+PHBhdGggZD0iTTEyIDJDMi40IDIgMiA4IDIgMTJzLjQgMTAgMTAgMTAgMTAtNCAxMC0xMFMyMS42IDIgMTIgMk0xMiAxMGMuNTUgMCAxIC40NSAxIDFTMTIgMTIgMTIgMTJzLTEtLjQ1LTEtMVMxMS40NSAxMCAxMiAxME04IDE2Yy41NSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxLTEtLjQ1LTEtMVN3LjQ1IDE2IDggMTZNMTYgMTZjLjSuNSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxLTEtLjQ1LTEtMVUzMTUuNDUgMTYgMTYgMTZNOC41NSA3LjU1TDkgMTVoMS40NWwtLjQ1LTIuNDVjLS4yLTEuMS0xLjM1LTEuOC0yLjQ1LTEuNTUtNy41LjYtMS4yLj打不开...'); filter: drop-shadow(0 0 5px #4a0404); }
-.muse-mark-text { color: #4a0404; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
-.v5-header h2 { color: #4a0404 !important; margin: 10px 0 0 0 !important; font-size: 22px !important; border-top: 2px dashed #4a0404 !important; border-bottom: none !important; padding-top: 5px; }
+/* 完美隔离全局样式的仿古暗黑庄园风格 */
+.v5-body {
+  background-color: #1a1612; /* 密室暗色背景 */
+  padding: 15px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
 
-.rule-banner { background: #e6ceb8; border: 1px solid #4a0404; padding: 10px; border-radius: 4px; margin-bottom: 20px; color: #4a0404; font-size: 14px; text-shadow: none; }
-.menu-box { display: flex; justify-content: space-between; align-items: center; background: #e2d6b5; padding: 12px 20px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #c4b593; }
+.container {
+  max-width: 750px;
+  margin: 10px auto;
+  background-color: #f4ecd8; /* 经典老旧羊皮纸色 */
+  padding: 25px;
+  border-radius: 8px;
+  border: 6px double #4a0404; /* 哥特风双边框 */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  color: #333;
+}
 
-.quiz-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
-@media(min-width: 600px) { .quiz-container { grid-template-columns: 1fr 1fr; } }
+.v5-header {
+  text-align: center;
+  border-bottom: 4px dashed #4a0404;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-.quiz-item { background: rgba(74, 4, 4, 0.04); padding: 15px; border-radius: 6px; border: 1px solid #c4b593; display: flex; flex-direction: column; gap: 10px; }
-.q-title { font-size: 15px; font-weight: bold; color: #4a0404; }
-.origin-q { font-size: 20px; color: #111; font-family: monospace; font-weight: bold; }
+.muse-mark-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
 
-.step-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.step-label { font-size: 14px; color: #555; }
+.muse-mark-logo {
+  width: 75px;
+  height: 75px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzRhMDQwNCI+PHBhdGggZD0iTTEyIDJDMi40IDIgMiA4IDIgMTJzLjQgMTAgMTAgMTAgMTAtNCAxMC0xMFMyMS42IDIgMTIgMk0xMiAxMGMuNTUgMCAxIC40NSAxIDFTMTIgMTIgMTIgMTJzLTEtLjQ1LTEtMVMxMS40NSAxMCAxMiAxME04IDE2Yy41NSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxLTEtLjQ1LTEtMVN3LjQ1IDE2IDggMTZNMTYgMTZjLjSuNSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxLTEtLjQ1LTEtMVUzMTUuNDUgMTYgMTYgMTZNOC41NSA3LjU1TDkgMTVoMS40NWwtLjQ1LTIuNDVjLS4yLTEuMS0xLjM1LTEuOC0yLjQ1LTEuNTUtNy41LjYtMS4yLjgtMS40NSAxLjU1ek0xMSAxMi4xNUw4IDE5aDNsMy02Ljg1TDExIDEyLjE1eiIvPjwvc3ZnPg==');
+  filter: drop-shadow(0 0 5px #4a0404);
+  opacity: 0.9;
+}
 
-.input-text, .input-ans { padding: 5px; font-size: 16px; border: 2px solid #4a0404; background: #fffaf0; color: #4a0404; border-radius: 4px; font-weight: bold; }
-.input-text { width: 150px; text-align: left; }
-.input-ans { width: 80px; text-align: center; }
+.muse-mark-text {
+  color: #4a0404;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Arial Narrow', sans-serif;
+  margin-top: -2px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 
-.input-text:disabled, .input-ans:disabled { background: #e2d6b5; }
-.feedback { font-size: 13px; font-weight: bold; margin-top: 5px; padding-top: 5px; border-top: 1px dotted #c4b593; }
+.v5-header h2 {
+  color: #4a0404 !important;
+  margin: 10px 0 0 0 !important;
+  font-size: 24px !important;
+  letter-spacing: 1px;
+  border-top: 2px dashed #4a0404 !important;
+  border-bottom: none !important;
+  padding-top: 5px;
+  background: transparent !important;
+}
+
+/* 顶部剪影装饰 */
+.v5-header::before, .v5-header::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 50px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: sepia(0.8) contrast(1.2);
+  opacity: 0.7;
+}
+
+.v5-header::before {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzRhMDQwNCI+PHBhdGggZD0iTTEyIDJDNi40OCA4IDIgNi40OCA4IDEycy40OCA2IDEwIDEyIDQuNDgtNi40OCA0LjQ4LTYuNDgtNC40OE0xMiAxMGMuNTUgMCAxIC40NSAxIDFTMTIgMTIgMTIgMTJzLTEtLjQ1LTEtMVMxMS40NSAxMCAxMiAxME04IDE2Yy41NSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxLTEtLjQ1LTEtMVN3LjQ1IDE2IDggMTZNMTYgMTZjLjU1IDAgMSAuNDUgMSAxcy0uNDUgMS0xIDEtMS0uNDUtMS0xUzE1LjQ1IDE2IDE2IDE2TTguNTUgNy41NUw5IDEwaDEuNDVsLS40NS0yLjQ1Yy0uMi0xLjEtMS4zNS0xLjgtMi40NS0xLjU1LTcuNS4yLTEuMi44LTEuNDUgMS41NXpNMTEgMTIuMTVMOCAxOWgzbDMtNi44NUwxMSAxMi4xNXoiLz48L3N2Zz4=');
+}
+
+.v5-header::after {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzRhMDQwNCI+PHBhdGggZD0iTTEyIDJDNi40OCA4IDIgNi40OCA4IDEycy40OCA2IDEwIDEyIDQuNDgtNi40OCA0LjQ4LTYuNDgtNC40OE0xMiAxMGMuNTUgMCAxIC40NSAxIDFTMTIgMTIgMTIgMTJzLTEtLjQ1LTEtMVMxMS40NSAxMCAxMiAxME04IDE2Yy41NSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxLTEtLjQ1LTEtMVN3LjQ1IDE2IDggMTZNMTYgMTZjLjU1IDAgMSAuNDUgMSAxcy0uNDUgMS0xIDEtMS0uNDUtMS0xUzE1LjQ1IDE2IDE2IDE2TTguNTUgNy41NUw5IDEwaDEuNDVsLS40NS0yLjQ1Yy0uMi0xLjEtMS4zNS0xLjgtMi40NS0xLjU1LTcuNS4yLTEuMi44LTEuNDUgMS41NXpNMTEgMTIuMTVMOCAxOWgzbDMtNi44NUwxMSAxMi4xNXoiLz48L3N2Zz4=');
+  transform: scaleX(-1);
+}
+
+.menu-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e2d6b5;
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 25px;
+  border: 1px solid #c4b593;
+}
+
+label {
+  font-weight: bold;
+  color: #4a0404;
+}
+
+select, button {
+  padding: 6px 14px;
+  font-size: 15px;
+  border-radius: 4px;
+  border: 1px solid #4a0404;
+  cursor: pointer;
+}
+
+select {
+  background: #fffaf0;
+  color: #333;
+}
+
+button {
+  background-color: #4a0404;
+  color: #f4ecd8;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #720606;
+  box-shadow: 0 0 8px rgba(114,6,6,0.5);
+}
+
+.quiz-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+@media(min-width: 600px) {
+  .quiz-container { grid-template-columns: 1fr 1fr; }
+}
+
+.quiz-item {
+  background: rgba(74, 4, 4, 0.04);
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px dashed #c4b593;
+  display: flex;
+  flex-direction: column;
+}
+
+.q-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c1a04;
+}
+
+.input-ans {
+  width: 75px;
+  padding: 6px;
+  font-size: 18px;
+  text-align: center;
+  border: 2px solid #4a0404;
+  background: #fffaf0;
+  color: #4a0404;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.input-ans:disabled {
+  background: #e2d6b5;
+  opacity: 0.8;
+}
+
+.feedback {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
 .correct { color: #2d5a27; }
 .wrong { color: #b80d0d; }
 
-#result-panel { text-align: center; margin-top: 25px; padding: 20px; background: #e2d6b5; border: 2px solid #4a0404; border-radius: 6px; }
-#score-display { font-size: 26px; font-weight: bold; color: #4a0404; }
+#result-panel {
+  text-align: center;
+  margin-top: 25px;
+  padding: 20px;
+  background: #e2d6b5;
+  border: 2px solid #4a0404;
+  border-radius: 6px;
+}
 
-.history-section { margin-top: 35px; border-top: 2px dashed #4a0404; padding-top: 20px; }
-.history-title { font-size: 16px; color: #4a0404; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-table { width: 100%; border-collapse: collapse; background: #fffaf0; font-size: 14px; }
-th, td { border: 1px solid #c4b593 !important; padding: 10px; text-align: center; }
-th { background: #4a0404 !important; color: #f4ecd8 !important; }
-td { background: transparent !important; }
-.btn-clear { padding: 4px 10px; font-size: 12px; background: #718096; border: none; color: #fff; border-radius: 4px; cursor: pointer; }
+#score-display {
+  font-size: 26px;
+  font-weight: bold;
+  color: #4a0404;
+}
+
+.history-section {
+  margin-top: 35px;
+  border-top: 2px dashed #4a0404;
+  padding-top: 20px;
+}
+
+.history-title {
+  font-size: 16px;
+  color: #4a0404;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fffaf0;
+  font-size: 14px;
+}
+
+th, td {
+  border: 1px solid #c4b593 !important;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background: #4a0404 !important;
+  color: #f4ecd8 !important;
+}
+
+td {
+  background: transparent !important;
+}
+
+.btn-clear {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #718096;
+  border: none;
+}
 </style>
