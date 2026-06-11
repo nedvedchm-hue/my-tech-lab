@@ -27,6 +27,14 @@ def fetch_world_cup_data():
                 "time": "明早 08:30",
                 "home_lineup": "预计赛前60分钟解锁",
                 "away_lineup": "预计赛前60分钟解锁"
+            },
+            {
+                "home": "韩国",
+                "away": "捷克",
+                "status": "等待首发",
+                "time": "明早 08:30",
+                "home_lineup": "预计赛前60分钟解锁",
+                "away_lineup": "预计赛前60分钟解锁"
             }
         ]
     }
