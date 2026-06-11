@@ -42,7 +42,7 @@ jobs:
 
       # 4. 跑完爬虫后，下面接着执行你原本的编译发布逻辑
       - name: Install dependencies
-        run: npm blob ...
+        run: npm install
       - name: Build with VitePress
         run: npm run build
       - name: Setup Node
