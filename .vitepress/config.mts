@@ -26,7 +26,8 @@ export default withMermaid(defineConfig({
           { text: 'Day 02: 学会用 Mermaid 画网络拓扑图', link: '/ai-day02' },
           { text: 'Day 03: 从“本地”走向“全网”', link: '/ai-day03' },
           { text: 'Day 04: 庄园解密练习”', link: '/ai-day04' },
-          { text: 'Day 05: 庄园解密练习升级版”', link: '/ai-day05' }
+          { text: 'Day 05: 庄园解密练习升级版”', link: '/ai-day05' },
+          { text: 'Day 06: 庄园解密练习升级再升级版”', link: '/ai-day06' }
         ]
       },
       {

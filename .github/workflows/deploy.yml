@@ -31,7 +31,9 @@ jobs:
 
       - name: Build with VitePress
         run: npm run build
-
+       # 💥 核心修改：在编译时注入云端密码箱里的 Key
+        env:
+          VITE_DEEPSEEK_API_KEY: ${{ secrets.VITE_DEEPSEEK_API_KEY }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

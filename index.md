@@ -36,6 +36,7 @@ features:
   **Day 03** | [如何将本地网站发布到 GitHub Pages（实现全球访问）](/ai-day03) | ✅ |
   **Day 04** | [庄园解密练习](/ai-day04) | ✅ |
   **Day 05** | [庄园解密练习升级版](/ai-day05) | ✅ |
+  **Day 06** | [庄园解密练习升级再升级版](/ai-day06) | ✅ |
   </div>
 
   <div style="flex: 1; min-width: 300px;">
