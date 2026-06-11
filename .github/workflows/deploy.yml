@@ -4,14 +4,22 @@ on:
   # 监听 main 分支的推送
   push:
     branches: [main]
+  workflow_dispatch:
+
+  # 2. 💥 核心：配置定时巡检策略 (Cron Job) 
+  # 每 30 分钟自动跑一次流水线（国际标准时间，根据需要调整）
+  schedule:
+    - cron: '*/30 * * * *'
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # 这一步是关键：给 GitHub Actions 写入 Pages 的权限
 permissions:
   contents: read
   pages: write
   id-token: write
 
+  
 
 jobs:
   build:
@@ -20,6 +28,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+        # 3. 💥 让云端服务器安装 Python 并跑爬虫
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python_platform: 'x64'
+          python-version: '3.10'
+
+      - name: Run World Cup Scraper
+        run: |
+          pip install requests
+          python get_world_cup.py
+
+      # 4. 跑完爬虫后，下面接着执行你原本的编译发布逻辑
+      - name: Install dependencies
+        run: npm blob ...
+      - name: Build with VitePress
+        run: npm run build
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

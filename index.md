@@ -37,6 +37,7 @@ features:
   **Day 04** | [庄园解密练习](/ai-day04) | ✅ |
   **Day 05** | [庄园解密练习升级版](/ai-day05) | ✅ |
   **Day 06** | [庄园解密练习升级再升级版](/ai-day06) | ✅ |
+  **Day 07** | [世界杯前线战术情报看板](/world-cup-analysis) | ✅ |
   </div>
 
   <div style="flex: 1; min-width: 300px;">
