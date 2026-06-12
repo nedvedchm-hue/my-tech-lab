@@ -3,87 +3,81 @@ import os
 import requests
 from datetime import datetime
 
-def fetch_real_world_cup_data():
-    print("📡 启动世界杯数据雷达，正在接入 SofaScore/FotMob 真实全员数据源...")
+def fetch_sofascore_cloud_data():
+    print("📡 正在由 GitHub 海外云端骨干网直接接入 SofaScore 核心数据源...")
     
-    # 💥 对接真实的今日世界杯数据接口
-    url = "https://api.footapi.com/v1/tournament/world-cup/matches/today"
+    # 在云端我们不需要镜像，直接直连官方，因为 GitHub 服务器在海外，没有403封锁！
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    url = f"https://api.sofascore.com/api/v1/sport/football/scheduled-events/{today_str}"
     
-    try:
-        response = requests.get(url, timeout=15)
-        if response.status_code == 200:
-            data = response.json()
-            cleaned_data = {
-                "update_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "matches": []
-            }
-            
-            for item in data.get("matches", []):
-                match_info = {
-                    "home": item.get("home_team_name"),
-                    "away": item.get("away_team_name"),
-                    "time": item.get("match_time_string"),
-                    "status": item.get("match_status_display"), # 已结束 / 已出首发 / 等待首发
-                }
-                
-                # 🟢 情况 A：如果比赛已经结束，拉出两队所有上场球员的真实权威评分
-                if match_info["status"] == "已结束":
-                    # 提取主队所有上场球员和分数 (格式化为：球员名 7.5分)
-                    home_players = item.get("home_player_ratings", []) # 接口返回的球员评分列表
-                    home_ratings_text = " \n".join([f"• {p['name']}: {p['rating']}分" for p in home_players if p.get('rating')])
-                    
-                    # 提取客队所有上场球员和分数
-                    away_players = item.get("away_player_ratings", [])
-                    away_ratings_text = " \n".join([f"• {p['name']}: {p['rating']}分" for p in away_players if p.get('rating')])
-                    
-                    match_info["home_lineup"] = f"📊 【主队全员赛后评分】\n{home_ratings_text if home_ratings_text else '评分统计中...'}"
-                    match_info["away_lineup"] = f"📊 【客队全员赛后评分】\n{away_ratings_text if away_ratings_text else '评分统计中...'}"
-                
-                # 🟡 情况 B：如果比赛还没打，展示最新的首发阵容
-                else:
-                    match_info["home_lineup"] = item.get("home_lineup_flat", "暂无首发（赛前60分钟自动解锁）")
-                    match_info["away_lineup"] = item.get("away_lineup_flat", "暂无首发（赛前60分钟自动解锁）")
-                
-                cleaned_data["matches"].append(match_info)
-                
-            print(f"✅ 成功拦截并清洗了 {len(cleaned_data['matches'])} 场比赛的真实全员数据！")
-            
-        else:
-            raise Exception(f"网关异常，状态码: {response.status_code}")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    # 💥 关键一招：直接强行关闭 Python 的本地代理读取，防止本地测试时被墙干扰
+    session = requests.Session()
+    session.trust_env = False 
 
-    except Exception as e:
-        print(f"❌ 真实链路抓取受阻: {e}。启动无缝容灾：下发刚结束的【韩国 vs 捷克】官方真实全员评分...")
-        # 🛡️ 容灾兜底数据：如果接口由于高频访问限流，直接下发官方这一场比赛的真实结算报文，确保数据跟官网百分之百一致！
+    response = session.get(url, headers=headers, timeout=15)
+    print(f"🌐 骨干网响应完成，状态码: {response.status_code}")
+    
+    if response.status_code == 200:
+        res_data = response.json()
         cleaned_data = {
-            "update_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " (SofaScore官方同步)",
-            "matches": [
-                {
-                    "home": "韩国",
-                    "away": "捷克",
-                    "status": "已结束",
-                    "time": "15:00",
-                    # 💥 替换成你从官网上看到的真实球员名单与真实评分
-                    "home_lineup": "📊 【韩国队全员赛后评分】\n• 孙兴慜: 7.4分\n• 李刚仁: 7.8分\n• 黄喜灿: 6.9分\n• 金玟哉: 7.2分\n• 黄仁范: 7.1分\n• 赵贤祐: 6.8分\n• 薛英佑: 6.5分",
-                    "away_lineup": "📊 【捷克队全员赛后评分】\n• 希克: 6.8分\n• 索切克: 7.3分\n• 普罗沃德: 7.0分\n• 曹法尔: 6.7分\n• 霍莱什: 6.5分\n• 斯塔涅克: 7.1分\n• 林格尔: 6.2分"
-                },
-                {
-                    "home": "加拿大",
-                    "away": "波黑",
-                    "status": "等待首发",
-                    "time": "明早 06:00",
-                    "home_lineup": "⏱️ 赛前60分钟云端机器人自动同步官方首发",
-                    "away_lineup": "⏱️ 赛前60分钟云端机器人自动同步官方首发"
-                }
-            ]
+            "update_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " (SofaScore 官方数据真活鱼)",
+            "matches": []
         }
-
-    # 写入 JSON 封包
-    data_dir = './.vitepress/theme/data'
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-    with open(f'{data_dir}/world-cup.json', 'w', encoding='utf-8') as f:
-        json.dump(cleaned_data, f, ensure_ascii=False, indent=2)
-    print("💾 官方真实报文已重新落盘封包！")
+        
+        # 遍历当天所有比赛
+        for event in res_data.get("events", []):
+            tournament_name = event.get("tournament", {}).get("name", "")
+            
+            # 动态匹配世界杯或者今天的测试比赛
+            if "World Cup" in tournament_name or True: 
+                match_id = event.get("id")
+                status_type = event.get("status", {}).get("type") # finished / nst
+                
+                match_info = {
+                    "home": event.get("homeTeam", {}).get("nameTranslations", {}).get("zh", event.get("homeTeam", {}).get("name")),
+                    "away": event.get("awayTeam", {}).get("nameTranslations", {}).get("zh", event.get("awayTeam", {}).get("name")),
+                    "time": datetime.fromtimestamp(event.get("startTimestamp", 0)).strftime("%H:%M"),
+                    "status": "已结束" if status_type == "finished" else "等待首发"
+                }
+                
+                # 如果比赛结束，深入抓取全员评分
+                if status_type == "finished":
+                    lineup_url = f"https://api.sofascore.com/api/v1/event/{match_id}/lineups"
+                    lineup_res = session.get(lineup_url, headers=headers, timeout=10)
+                    
+                    if lineup_res.status_code == 200:
+                        lineup_data = lineup_res.json()
+                        
+                        # 提取主队全员和 Sofa 真实评分
+                        home_players = lineup_data.get("home", {}).get("players", [])
+                        home_text = " \n".join([f"• {p['player']['name']}: {p.get('statistics', {}).get('rating', '暂无')}分" for p in home_players if p.get('statistics', {}).get('rating')])
+                        
+                        # 提取客队全员和 Sofa 真实评分
+                        away_players = lineup_data.get("away", {}).get("players", [])
+                        away_text = " \n".join([f"• {p['player']['name']}: {p.get('statistics', {}).get('rating', '暂无')}分" for p in away_players if p.get('statistics', {}).get('rating')])
+                        
+                        match_info["home_lineup"] = f"📊 【SofaScore 赛后全员权威评分】\n{home_text}"
+                        match_info["away_lineup"] = f"📊 【SofaScore 赛后全员权威评分】\n{away_text}"
+                else:
+                    match_info["home_lineup"] = "⏱️ 赛前 60 分钟自动解锁首发名单"
+                    match_info["away_lineup"] = "⏱️ 赛前 60 分钟自动解锁首发名单"
+                    
+                cleaned_data["matches"].append(match_info)
+        
+        # 写入 JSON
+        data_dir = './.vitepress/theme/data'
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+        with open(f'{data_dir}/world-cup.json', 'w', encoding='utf-8') as f:
+            json.dump(cleaned_data, f, ensure_ascii=False, indent=2)
+            
+        print(f"💾 [云端封包成功] 成功洗出今日 {len(cleaned_data['matches'])} 场球赛真实 Sofa 评分清单！")
+    else:
+        raise Exception(f"SofaScore 核心接口拒绝响应，状态码: {response.status_code}")
 
 if __name__ == "__main__":
-    fetch_real_world_cup_data()
+    fetch_sofascore_cloud_data()
