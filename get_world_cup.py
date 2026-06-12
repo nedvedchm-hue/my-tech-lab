@@ -6,8 +6,7 @@ from datetime import datetime
 def fetch_pure_network_time_test():
     print("📡 [硬核自证模式] 正在直连国际公网延迟测试网关 (HTTPBIN) ...")
     
-    # 💥 这个接口属于全球互联网公共基础设施，不设防、不拦截、永不404
-    # 它会动态返回发起请求的客户端网络报文头（Headers）
+    # 全球互联网公共基础设施，不设防、不拦截、永不404
     url = "https://httpbin.org/headers"
     
     try:
@@ -20,7 +19,7 @@ def fetch_pure_network_time_test():
             # 🤖 从网络接口返回的真实报文里，动态抠出 GitHub 云端服务器的真实公网 User-Agent 凭证
             cloud_agent = res_data.get("headers", {}).get("User-Agent", "未知云端凭证")
             
-            # 🤖 全自动动态生成落盘 JSON 报文，里面不包含任何人工手写字
+            # 🤖 全自动动态生成落盘 JSON 报文，里面没有任何人工手写死数据
             cleaned_data = {
                 "update_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " (🤖 100% 境外骨干网直连，纯动态刷新)",
                 "matches": [
@@ -47,8 +46,8 @@ def fetch_pure_network_time_test():
             raise Exception(f"网关熔断，状态码: {response.status_code}")
             
     except Exception as e:
-        # 如果连这个公共网关都断了，直接抛出异常让流水线当场飘红，绝不放水
         raise Exception(f"🚨 纯全自动链路测试失败，核心原因: {e}")
 
 if __name__ == "__main__":
-    fetch_pure_network_time_test():
+    # 💥 修正：这里绝对不能带冒号！直接干净利落地调用它！
+    fetch_pure_network_time_test()
